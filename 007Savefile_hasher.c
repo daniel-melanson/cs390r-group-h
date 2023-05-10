@@ -21,6 +21,7 @@ typedef struct {
 
 /**
  * Takes in a pointer to a game slot
+ * @param data: pointer to the 0x20 byte of the save file
  * @returns the hash of the save data
 */
 uint64_t Hash(unsigned char *data)
@@ -74,6 +75,8 @@ uint64_t Hash(unsigned char *data)
 
 /**
  * Takes in two 32 bit integers
+ * @param hi: the higher 32 bits
+ * @param lo: the lower 32 bits
  * @returns a 64 bit sub-hash
 */
 uint64_t SubHash(uint32_t hi, uint32_t lo)
@@ -94,7 +97,10 @@ uint64_t SubHash(uint32_t hi, uint32_t lo)
 }
 
 /**
- * Takes in a pointer to the 0x20 byte of the save file and fills the GameSlot array with the 5 game slots
+ * Takes in a pointer to the 0x20 byte of the save file 
+ * and fills the GameSlot array with the 5 game slots
+ * @param slots: pointer to the slots array
+ * @param gameSlot: pointer to the 0x20 byte of the save file
 */
 void fillGameSlots(GameSlot *slots, unsigned char *gameSlot) {
     for (int i = 0; i < 5; i++) {
@@ -109,6 +115,7 @@ void fillGameSlots(GameSlot *slots, unsigned char *gameSlot) {
 
 /**
  * Takes in a pointer to the 0x20 byte of the save file and prints the 5 game slots
+ * @param slots: pointer to the 0x20 byte of the save file
 */
 void printGameSlots(GameSlot *slots) {
     for (int i = 0; i < 5; i++) {
@@ -126,6 +133,7 @@ void printGameSlots(GameSlot *slots) {
 
 /**
  * Takes in a pointer to the 0x20 byte of the save file and prints the 5 hashes
+ * @param slots: pointer to the 0x20 byte of the save file
 */
 void printHashes(GameSlot *slots) {
     for (int i = 0; i < 5; i++) {
@@ -140,6 +148,7 @@ void printHashes(GameSlot *slots) {
 /**
  * Takes in a pointer to the 0x20 byte of the save file 
  * prints the 5 hashes and the hash of the save data
+ * @param slots: pointer to the 0x20 byte of the save file
 */
 void printHashComparison(GameSlot *slots) {
     for (int i = 0; i < 5; i++) {
@@ -150,6 +159,23 @@ void printHashComparison(GameSlot *slots) {
         printf("\n");
         uint64_t hash = Hash(slots[i].data);
         printf("Slot %d function hash: %016llx\n", i, hash);
+    }
+}
+
+/**
+ * Takes in a pointer to the 0x20 byte of the save file and generates the 5 game slots
+ * @param slots: pointer to the 0x20 byte of the save file
+ * @param byte: byte to fill the save data with
+*/
+void generateGameSlots(GameSlot *slots, unsigned char byte) {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < SAVE_LENGTH; j++) {
+            slots[i].data[j] = byte;
+        }
+        uint64_t hash = Hash(slots[i].data);
+        for (int j = 0; j < HASH_LENGTH; j++) {
+            slots[i].hash[j] = (hash >> (8 * (7 - j))) & 0xFF;
+        }
     }
 }
 
@@ -187,17 +213,8 @@ int main(int argc, char **argv) {
     // print each hash and each hash function result
     printHashComparison(slots);
 
-    // TODO: separate into a function that randomizes the save data and calculates the hash
-    // clear all save data in game slots, calculate new hash and set as hash for game slot
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 0x58; j++) {
-            slots[i].data[j] = 0;
-        }
-        uint64_t hash = Hash(slots[i].data);
-        for (int j = 0; j < 8; j++) {
-            slots[i].hash[j] = (hash >> (8 * (7 - j))) & 0xFF;
-        }
-    }
+    // generate new save data and hash for each slot
+    generateGameSlots(slots, 1);
 
     printGameSlots(slots);
     printHashComparison(slots);
