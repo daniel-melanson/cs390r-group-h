@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     }
 
     
-    FILE *file = fopen(argv[1], "r");
+    FILE *file = fopen(argv[1], "rb");
 
     if (!file) {
         perror("Error when opening the file");
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
         saves[i].chksum2 = crc[1];
     }
 
-    file = fopen(argv[1], "w");
+    file = fopen(argv[1], "wb");
 
     fwrite(data, 1, FILE_SIZE, file);
 
