@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <winsock.h>
 
 typedef unsigned char u8;
 typedef int s32;
@@ -103,8 +104,9 @@ int main(int argc, char **argv) {
 
         fileGenerateCRC(&saves[i].completion_bitflags, (u8 *) (&saves[i+1]), crc); // do checksum on save data
 
-        saves[i].chksum1 = crc[0];
-        saves[i].chksum2 = crc[1];
+        // convert to big endian
+        saves[i].chksum1 = htonl(crc[0]);
+        saves[i].chksum2 = htonl(crc[1]);
     }
 
     file = fopen(argv[1], "wb");
