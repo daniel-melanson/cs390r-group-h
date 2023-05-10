@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     for (i = 0; i < 5; i++) {
         num = fread(&cur_save, sizeof(save_data), 1, file);
 
-        if (num != sizeof(save_data)) {
+        if (num != 1) {
             perror("Error when reading file");
             return 1;
         }
@@ -103,9 +103,9 @@ int main(int argc, char **argv) {
 
         fseek(file,  -sizeof(save_data), SEEK_CUR);
 
-        num = fwrite(crc, sizeof(crc), 2, file);
+        num = fwrite(crc, sizeof(crc), 1, file);
 
-        if (num != sizeof(crc)) {
+        if (num != 1) {
             perror("Error when writing to file");
             return 1;
         }
