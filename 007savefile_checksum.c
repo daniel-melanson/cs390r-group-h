@@ -49,7 +49,7 @@ u32 randomGetNextFrom(u64 *param_1) {
  * @param retval
  * @return * void
  */
-void fileGenerateCRC(u8 *addressA, u8 *addressB, save_data *retval)
+void fileGenerateCRC(u8 *addressA, u8 *addressB, s32 *retval)
 {
     u8 *byte;
     s32 shift      = 0; // Shift value
@@ -68,8 +68,8 @@ void fileGenerateCRC(u8 *addressA, u8 *addressB, save_data *retval)
         polynormal += *byte << (shift & 0xF) ;
         checksum2 ^= randomGetNextFrom(&polynormal);
     }
-    retval->chksum1 = checksum1;
-    retval->chksum2 = checksum2;
+    retval[0] = checksum1;
+    retval[1] = checksum2;
 }
 
 int main(int argc, char **argv) {
@@ -96,17 +96,19 @@ int main(int argc, char **argv) {
 
         num = fread(&cur_save, 1, sizeof(save_data), file);
 
-        if (feof(file)) {
-            fprintf(stderr, "Reached end of file.\n");
-            return 1;
-        }
+        
 
         if (num != sizeof(save_data)) {
-            perror("Error when reading file");
+            if (feof(file)) {
+                fprintf(stderr, "Reached end of file early.\n");
+            } else{
+                perror("Error when reading file");
+            }
+
             return 1;
         }
         
-        fileGenerateCRC(&cur_save.completion_bitflags, 1 + &cur_save, &crc); // do checksum on save data
+        fileGenerateCRC(&cur_save.completion_bitflags, (u8 *) (1 + &cur_save), crc); // do checksum on save data
 
         fseek(file,  -sizeof(save_data), SEEK_CUR);
 
