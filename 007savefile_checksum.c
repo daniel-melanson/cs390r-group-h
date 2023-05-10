@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < NUM_SAVES; ++i) {
 
-        fileGenerateCRC(&saves[i].completion_bitflags, (u8 *) (1 + &saves[i]), crc); // do checksum on save data
+        fileGenerateCRC(&saves[i].completion_bitflags, (u8 *) (&saves[i+1]), crc); // do checksum on save data
 
         saves[i].chksum1 = crc[0];
         saves[i].chksum2 = crc[1];
