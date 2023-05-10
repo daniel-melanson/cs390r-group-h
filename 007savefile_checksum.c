@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
         saves[i].chksum2 = crc[1];
     }
 
-    FILE *file = fopen(argv[1], "w");
+    file = fopen(argv[1], "w");
 
     fwrite(data, 1, FILE_SIZE, file);
 
