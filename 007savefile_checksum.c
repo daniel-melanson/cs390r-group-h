@@ -1,8 +1,6 @@
 
 #include <stdio.h>
 
-#define FIRST_CHECKSUM_SIZE 0x20
-
 typedef unsigned char u8;
 typedef int s32;
 typedef long long s64;
@@ -28,6 +26,11 @@ typedef struct save_data
   char padding;
   u8 times[(SP_LEVEL_MAX-1) * 4];
 } save_data;
+
+#define FIRST_CHECKSUM_SIZE 0x20
+#define NUM_SAVES 5
+// #define FILE_SIZE (FIRST_CHECKSUM_SIZE + NUM_SAVES * sizeof(save_data))
+#define FILE_SIZE 512
 
 // From /src/random.c
 /**
@@ -79,46 +82,34 @@ int main(int argc, char **argv) {
     }
 
     
-    FILE *file = fopen(argv[1], "r+");
+    FILE *file = fopen(argv[1], "r");
 
     if (!file) {
         perror("Error when opening the file");
         return 1;
     }
 
-    int i;
-    save_data cur_save;
+    
+    u8 data[FILE_SIZE];
     s32 crc[2];
-    size_t num;
 
-    for (i = 0; i < 5; i++) {
-        fseek(file, FIRST_CHECKSUM_SIZE + i * sizeof(save_data), SEEK_SET);
+    fread(data, 1, FILE_SIZE, file);
 
-        num = fread(&cur_save, 1, sizeof(save_data), file);
+    save_data *saves = (save_data *) (data + FIRST_CHECKSUM_SIZE);
 
-        
+    fclose(file);
 
-        if (num != sizeof(save_data)) {
-            if (feof(file)) {
-                fprintf(stderr, "Reached end of file early.\n");
-            } else{
-                perror("Error when reading file");
-            }
+    for (int i = 0; i < NUM_SAVES; ++i) {
 
-            return 1;
-        }
-        
-        fileGenerateCRC(&cur_save.completion_bitflags, (u8 *) (1 + &cur_save), crc); // do checksum on save data
+        fileGenerateCRC(&saves[i].completion_bitflags, (u8 *) (1 + &saves[i]), crc); // do checksum on save data
 
-        fseek(file,  -sizeof(save_data), SEEK_CUR);
-
-        num = fwrite(crc, 1, sizeof(crc), file);
-
-        if (num != sizeof(crc)) {
-            perror("Error when writing to file");
-            return 1;
-        }
+        saves[i].chksum1 = crc[0];
+        saves[i].chksum2 = crc[1];
     }
+
+    FILE *file = fopen(argv[1], "w");
+
+    fwrite(data, 1, FILE_SIZE, file);
 
     fclose(file);
     return 0;
