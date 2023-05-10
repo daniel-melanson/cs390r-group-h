@@ -1,6 +1,8 @@
 
 #include <stdio.h>
 
+#define FIRST_CHECKSUM_SIZE 0x20
+
 typedef unsigned char u8;
 typedef int s32;
 typedef long long s64;
@@ -89,9 +91,9 @@ int main(int argc, char **argv) {
     s32 crc[2];
     size_t num;
 
-    fseek(file, 0x20, SEEK_SET);
-
     for (i = 0; i < 5; i++) {
+        fseek(file, FIRST_CHECKSUM_SIZE + i * sizeof(save_data), SEEK_SET);
+
         num = fread(&cur_save, 1, sizeof(save_data), file);
 
         if (feof(file)) {
@@ -114,8 +116,6 @@ int main(int argc, char **argv) {
             perror("Error when writing to file");
             return 1;
         }
-
-        fseek(file, sizeof(save_data) - sizeof(crc), SEEK_CUR);
     }
 
     fclose(file);
