@@ -71,5 +71,39 @@ void fileGenerateCRC(u8 *addressA, u8 *addressB, save_data *retval)
 }
 
 int main(int argc, char **argv) {
-    printf("%lu\n", sizeof(save_data)); 
+    if (argc != 2) {
+        fprintf(stderr, "Usage: ./007savefile_checksum <savefile.eep>");
+        return 1;
+    }
+
+    
+    FILE *file = fopen(argv[1], "rw");
+
+    if (!file) {
+        perror("Error when opening the file");
+        return 1;
+    }
+
+    int i;
+    save_data cur_save;
+    s32 crc[2];
+
+    for (i = 0; i < 5; i++) {
+        size_t num_read = fread(&cur_save, sizeof(save_data), 1, file);
+
+        if (num_read != sizeof(save_data)) {
+            perror("Error when reading file");
+            return 1;
+        }
+        
+        fileGenerateCRC(&cur_save.completion_bitflags, 1 + &cur_save, &crc); // do checksum on save data
+
+        fseek(file,  -sizeof(save_data), SEEK_CUR);
+
+        fwrite(crc, sizeof(crc), 2, file);
+
+        fseek(file, sizeof(save_data) - sizeof(crc), SEEK_CUR);
+    }
+
+    fclose(file);
 }
