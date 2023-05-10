@@ -87,11 +87,12 @@ int main(int argc, char **argv) {
     int i;
     save_data cur_save;
     s32 crc[2];
+    size_t num;
 
     fseek(file, 0x20, SEEK_SET);
 
     for (i = 0; i < 5; i++) {
-        size_t num = fread(&cur_save, sizeof(save_data), 1, file);
+        num = fread(&cur_save, sizeof(save_data), 1, file);
 
         if (num != sizeof(save_data)) {
             perror("Error when reading file");
@@ -102,7 +103,7 @@ int main(int argc, char **argv) {
 
         fseek(file,  -sizeof(save_data), SEEK_CUR);
 
-        size_t num = fwrite(crc, sizeof(crc), 2, file);
+        num = fwrite(crc, sizeof(crc), 2, file);
 
         if (num != sizeof(crc)) {
             perror("Error when writing to file");
