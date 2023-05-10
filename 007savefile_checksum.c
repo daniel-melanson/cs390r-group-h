@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
     }
 
     
-    FILE *file = fopen(argv[1], "rw");
+    FILE *file = fopen(argv[1], "r+");
 
     if (!file) {
         perror("Error when opening the file");
@@ -88,10 +88,12 @@ int main(int argc, char **argv) {
     save_data cur_save;
     s32 crc[2];
 
-    for (i = 0; i < 5; i++) {
-        size_t num_read = fread(&cur_save, sizeof(save_data), 1, file);
+    fseek(file, 0x20, SEEK_SET);
 
-        if (num_read != sizeof(save_data)) {
+    for (i = 0; i < 5; i++) {
+        size_t num = fread(&cur_save, sizeof(save_data), 1, file);
+
+        if (num != sizeof(save_data)) {
             perror("Error when reading file");
             return 1;
         }
@@ -100,7 +102,12 @@ int main(int argc, char **argv) {
 
         fseek(file,  -sizeof(save_data), SEEK_CUR);
 
-        fwrite(crc, sizeof(crc), 2, file);
+        size_t num = fwrite(crc, sizeof(crc), 2, file);
+
+        if (num != sizeof(crc)) {
+            perror("Error when writing to file");
+            return 1;
+        }
 
         fseek(file, sizeof(save_data) - sizeof(crc), SEEK_CUR);
     }
