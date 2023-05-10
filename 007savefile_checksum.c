@@ -94,6 +94,11 @@ int main(int argc, char **argv) {
     for (i = 0; i < 5; i++) {
         num = fread(&cur_save, 1, sizeof(save_data), file);
 
+        if (feof(file)) {
+            fprintf(stderr, "Reached end of file.\n");
+            return 1;
+        }
+
         if (num != sizeof(save_data)) {
             perror("Error when reading file");
             return 1;
@@ -114,4 +119,5 @@ int main(int argc, char **argv) {
     }
 
     fclose(file);
+    return 0;
 }
