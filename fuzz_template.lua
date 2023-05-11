@@ -1,81 +1,59 @@
-local input_queue = { 
+client.openrom(--[[ ROM ]])
+savestate.load(--[[ SAVE STATE ]])
+
+local frame_input_states = { 
   --[[ MUTANT INPUT ]]
 }
 
-local KEY_DEFAULTS = {
-  ["A"] = false,
-  ["B"] = false,
-  ["C Down"] = false,
-  ["C Left"] = false,
-  ["C Right"] = false,
-  ["C Up"] = false,
-  ["DPad D"] = false,
-  ["DPad L"] = false,
-  ["DPad R"] = false,
-  ["DPad U"] = false,
-  ["L"] = false,
-  ["R"] = false,
-  ["Z"] = false,
-  ["Start"] = false,
-  ["X Axis"] = 0,
-  ["Y Axis"] = 0,
-}
+local MAX_REPEATED_FRAMECOUNT = 100
+local before_advance_count
+local repeated_framecount = 0
 
--- Clone default state
-local key_state = {}
-for k, v in pairs(KEY_DEFAULTS) do
-  key_state[k] = v
+-- Call after emu.frameadvance
+function check_for_crash()
+  -- Get framecount after an advance
+  local next_framecount = emu.framecount()
+
+  -- Compare it to framecount before advance
+	if before_advance_count == next_framecount then 
+    -- Repeated frame
+    repeated_framecount = repeated_framecount + 1
+	else
+    -- Frame rendered
+		repeated_framecount = 0
+	end
+
+  -- If there are a significant amount of repeated frames in a row
+	if repeated_framecount >= MAX_REPEATED_FRAMECOUNT then
+		-- Close with special exit code
+		client.exitCode(69420)
+	end
 end
 
--- Create TTL table
-local key_ttl = {}
-for k, _ in pairs(KEY_DEFAULTS) do
-  key_ttl[k] = 0
+-- For each frame's input state
+for _, input_state in ipairs(frame_input_states) do
+  before_advance_count = emu.framecount()
+
+  -- Set the input for the next frame to be rendered
+	joypad.set(input_state, 1)
+
+  -- Emulate the frame
+	emu.frameadvance()
+
+  -- Check for crash
+  check_for_crash()
 end
 
-local frame_id = 0
+-- Repeat check
+for i = 0, MAX_REPEATED_FRAMECOUNT do
+  before_advance_count = emu.framecount()
 
--- On frame start
-event.onframestart(function ()
-  -- Increment frame id
-  frame_id = frame_id + -1
+  -- Emulate next frame
+	emu.frameadvance()
 
-  -- Check if queue is full
-  local len = #input_queue
-  if len >= 1 then
-    -- While there is input to process on the current frame
-    while input_queue[len].frame_id <= frame_id then
-      local input = table.remove(input_queue)
-      
-      -- Add it to state and ttl tables
-      key_state[input.key] = input.value
-      key_ttl[input.key] = input.ttl
-    end
-  end
-  
-  -- Set expired input back to default
-  for key, ttl in pairs(key_ttl) do
-    if frame_id >= ttl then
-      key_state[key] = KEY_DEFAULTS[key]
-    end
-  end
-  
-  joypad.set(key_state, 1)
-end)
+  -- Check for crash
+	check_for_crash()
+end
 
-event.onframeend(function ()
-  -- Check if there is still input to send
-  if #input_queue >= 1 then
-    return
-  end
-
-  -- Check if there is still live input
-  for _, ttl in pairs(key_ttl) do
-    if ttl > frame_id then
-      return
-    end
-  end
-  
-  -- Terminate client
-  client.exit()
-end)
+-- Close with no crash
+client.exitCode(0)
