@@ -104,7 +104,7 @@ uint64_t SubHash(uint32_t hi, uint32_t lo)
  * @param gameSlot: pointer to the 0x20 byte of the save file
 */
 void fillGameSlots(GameSlot *slots, unsigned char *gameSlot) {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
         for (int j = 0; j < HASH_LENGTH; j++) {
             slots[i].hash[j] = gameSlot[i * 0x60 + j];
         }
