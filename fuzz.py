@@ -5,23 +5,6 @@ import os
 from typing import List, NamedTuple
 import random
 
-KEYS = [
-    "A",
-    "B",
-    "C Down",
-    "C Left",
-    "C Right",
-    "C Up",
-    "DPad D",
-    "DPad L",
-    "DPad R",
-    "DPad U",
-    "L",
-    "R",
-    "Z",
-    "Start",
-]
-
 
 def clean_in_folder():
     for file in os.listdir("./in"):
@@ -31,9 +14,7 @@ def clean_in_folder():
 
 
 def to_lua_table(input) -> str:
-    return (
-        "{ " + ", ".join([f'["{key}"] = {state}' for key, state in input.items()]) + " }"
-    )
+    return "{ " + ", ".join([f'["{key}"] = {state}' for key, state in input.items()]) + " }"
 
 
 def to_input_table(input_list) -> str:
@@ -41,14 +22,32 @@ def to_input_table(input_list) -> str:
 
 
 def generate_input() -> List:
+    KEYS = [
+        "A",
+        "B",
+        "C Down",
+        "C Left",
+        "C Right",
+        "C Up",
+        "DPad D",
+        "DPad L",
+        "DPad R",
+        "DPad U",
+        "L",
+        "R",
+        "Z",
+        "Start",
+    ]
+
     MAX_FRAMES = 1000
     MIN_FRAMES = 100
-
     n = random.randint(MIN_FRAMES, MAX_FRAMES)
+
     frame_input_states = []
     for _ in range(n):
         frame_state = {}
 
+        # For each key: A, B, C Down, C Left, C Right, ...
         for key in KEYS:
             frame_state[key] = "true" if random.random() > 0.5 else "false"
 
@@ -97,9 +96,7 @@ def main() -> None:
                 os.makedirs(CRASH_DIR_PATH)
 
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            crash_path = os.path.join(
-                CRASH_DIR_PATH, f"crash-{timestamp}-exit-{exitcode}"
-            )
+            crash_path = os.path.join(CRASH_DIR_PATH, f"crash-{timestamp}-exit-{exitcode}")
 
             with open(crash_path, "w") as f:
                 f.write(mutant_content)
