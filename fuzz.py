@@ -32,7 +32,7 @@ def clean_in_folder():
 
 def to_lua_table(input) -> str:
     return (
-        "{ " + ", ".join([f'"{key}" = {state}' for key, state in input.items()]) + " }"
+        "{ " + ", ".join([f'["{key}"] = {state}' for key, state in input.items()]) + " }"
     )
 
 
@@ -77,12 +77,12 @@ def main() -> None:
         # Construct a mutant of template with generated input
         mutant_content = (
             template_content.replace("--[[ MUTANT INPUT ]]", to_input_table(input_list))
-            .replace("-- [[ SAVE STATE ]]", f'"{SAVE_STATE_PATH}"')
-            .replace("-- [[ ROM ]]", f'"{ROM_PATH}"')
+            .replace("--[[ SAVE STATE ]]", f'"{SAVE_STATE_PATH}"')
+            .replace("--[[ ROM ]]", f'"{ROM_PATH}"')
         )
 
         # Write input to file
-        with open(INPUT_PATH) as f:
+        with open(INPUT_PATH, "w") as f:
             f.write(mutant_content)
 
         # Run the emulation client
