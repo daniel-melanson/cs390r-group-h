@@ -12,11 +12,12 @@
 uint64_t SubHash(uint32_t hi, uint32_t lo);
 uint64_t Hash(unsigned char *data);
 
-// struct for game slot 
-// first 0x8 bytes is hash 
+// struct for game slot
+// first 0x8 bytes is hash
 // remaining 0x58 bytes is save data
 // total 0x60 bytes
-typedef struct {
+typedef struct
+{
     unsigned char hash[HASH_LENGTH];
     unsigned char data[SAVE_LENGTH];
 } GameSlot;
@@ -25,7 +26,7 @@ typedef struct {
  * Takes in a pointer to a game slot
  * @param data: pointer to the beginning of a game slot
  * @returns the hash of the save data
-*/
+ */
 uint64_t Hash(unsigned char *data)
 {
     uint32_t seedLo = 0x3108B3C1;
@@ -80,7 +81,7 @@ uint64_t Hash(unsigned char *data)
  * @param hi: the higher 32 bits
  * @param lo: the lower 32 bits
  * @returns a 64 bit sub-hash
-*/
+ */
 uint64_t SubHash(uint32_t hi, uint32_t lo)
 {
     uint64_t a3 = (uint64_t)hi << 32 | lo;
@@ -101,15 +102,19 @@ uint64_t SubHash(uint32_t hi, uint32_t lo)
 /**
  * Takes in a pointer to the 0x20 byte of the save file and prints the 5 game slots
  * @param slots: pointer to the 0x20 byte of the save file
-*/
-void printGameSlots(GameSlot *slots) {
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
+ */
+void printGameSlots(GameSlot *slots)
+{
+    for (int i = 0; i < TOTAL_SLOTS; i++)
+    {
         printf("Slot %d:\n", i);
-        for (int j = 0; j < HASH_LENGTH; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++)
+        {
             printf("%02x ", slots[i].hash[j]);
         }
         printf("\n");
-        for (int j = 0; j < SAVE_LENGTH; j++) {
+        for (int j = 0; j < SAVE_LENGTH; j++)
+        {
             printf("%02x ", slots[i].data[j]);
         }
         printf("\n");
@@ -117,28 +122,17 @@ void printGameSlots(GameSlot *slots) {
 }
 
 /**
- * Takes in a pointer to the 0x20 byte of the save file and prints the 5 hashes
- * @param slots: pointer to the 0x20 byte of the save file
-*/
-void printHashes(GameSlot *slots) {
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
-        printf("Slot %d: ", i);
-        for (int j = 0; j < HASH_LENGTH; j++) {
-            printf("%02x ", slots[i].hash[j]);
-        }
-        printf("\n");
-    }
-}
-
-/**
- * Takes in a pointer to the 0x20 byte of the save file 
+ * Takes in a pointer to the 0x20 byte of the save file
  * prints the 5 hashes and the hash of the save data
  * @param slots: pointer to the 0x20 byte of the save file
-*/
-void printHashComparison(GameSlot *slots) {
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
+ */
+void printHashComparison(GameSlot *slots)
+{
+    for (int i = 0; i < TOTAL_SLOTS; i++)
+    {
         printf("Slot %d saved hash: ", i);
-        for (int j = 0; j < HASH_LENGTH; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++)
+        {
             printf("%02x ", slots[i].hash[j]);
         }
         printf("\n");
@@ -151,14 +145,18 @@ void printHashComparison(GameSlot *slots) {
  * Takes in a pointer to the 0x20 byte of the save file and generates the 5 game slots
  * @param slots: pointer to the 0x20 byte of the save file
  * @param byte: byte to fill the save data with
-*/
-void generateGameSlots(GameSlot *slots, unsigned char byte) {
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
-        for (int j = 0; j < SAVE_LENGTH; j++) {
+ */
+void generateGameSlots(GameSlot *slots, unsigned char byte)
+{
+    for (int i = 0; i < TOTAL_SLOTS; i++)
+    {
+        for (int j = 0; j < SAVE_LENGTH; j++)
+        {
             slots[i].data[j] = byte;
         }
         uint64_t hash = Hash(slots[i].data);
-        for (int j = 0; j < HASH_LENGTH; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++)
+        {
             slots[i].hash[j] = (hash >> (8 * (7 - j))) & 0xFF;
         }
     }
@@ -167,11 +165,14 @@ void generateGameSlots(GameSlot *slots, unsigned char byte) {
 /**
  * Takes in a pointer to the 0x20 byte of the save file and generates hashes for the 5 game slots
  * @param slots: pointer to the 0x20 byte of the save file
-*/
-void generateHashes(GameSlot *slots) {
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
+ */
+void generateHashes(GameSlot *slots)
+{
+    for (int i = 0; i < TOTAL_SLOTS; i++)
+    {
         uint64_t hash = Hash(slots[i].data);
-        for (int j = 0; j < HASH_LENGTH; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++)
+        {
             slots[i].hash[j] = (hash >> (8 * (7 - j))) & 0xFF;
         }
     }
@@ -180,29 +181,35 @@ void generateHashes(GameSlot *slots) {
 /**
  * Takes in a pointer to the 0x20 byte of the save file and generates the 5 game slots with random data
  * @param slots: pointer to the 0x20 byte of the save file
-*/
-void generateRandomSlots(GameSlot *slots) {
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
-        for (int j = 0; j < SAVE_LENGTH; j++) {
+ */
+void generateRandomSlots(GameSlot *slots)
+{
+    for (int i = 0; i < TOTAL_SLOTS; i++)
+    {
+        for (int j = 0; j < SAVE_LENGTH; j++)
+        {
             slots[i].data[j] = rand() % 256;
         }
         uint64_t hash = Hash(slots[i].data);
-        for (int j = 0; j < HASH_LENGTH; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++)
+        {
             slots[i].hash[j] = (hash >> (8 * (7 - j))) & 0xFF;
         }
     }
 }
 
-
-int main(int argc, char **argv) {
-    if (argc < 3) {
+int main(int argc, char **argv)
+{
+    if (argc < 3)
+    {
         fprintf(stderr, "Usage: ./007savefile_checksum <savefile.eep> <0 specific byte | 1 randomize | 2 generate new hashes> <specific byte>\n");
         return 1;
     }
 
     // read in file as byte array, 512 bytes
     FILE *fp = fopen(argv[1], "rb");
-    if (fp == NULL) {
+    if (fp == NULL)
+    {
         fprintf(stderr, "Could not open file %s\n", argv[1]);
         return 2;
     }
@@ -212,28 +219,23 @@ int main(int argc, char **argv) {
     fclose(fp);
 
     // pointer to the 0x20 byte
-    unsigned char *gameSlot = buffer + HEADER_LENGTH;
+    GameSlot *slots = (GameSlot *)(buffer + HEADER_LENGTH);
 
-    // create a gameSlot array of 5 and fill in the hash with first 8 bytes, save data with remainder
-    GameSlot *slots = (GameSlot *) gameSlot;
-
-    // print out the gameslots, print as hex with spaces, separating the hash and savedata in separate lines
     printGameSlots(slots);
-
-    // print each hash into bytes separated by spaces
-    printHashes(slots);
-
-    // print each hash and each hash function result
     printHashComparison(slots);
 
-    // generate new save data and hash for each slot
-    if (atoi(argv[2]) == 0) {
+    // generate new save data and/or hash for each slot
+    if (atoi(argv[2]) == 0)
+    {
         generateGameSlots(slots, (unsigned char)atoi(argv[3]));
-    } else if (atoi(argv[2]) == 1) {
-        // set srand seed to current time
+    }
+    else if (atoi(argv[2]) == 1)
+    {
         srand(time(NULL));
         generateRandomSlots(slots);
-    } else {
+    }
+    else
+    {
         generateHashes(slots);
     }
 
@@ -242,7 +244,8 @@ int main(int argc, char **argv) {
 
     // write new save data to file
     fp = fopen(argv[1], "wb");
-    if (fp == NULL) {
+    if (fp == NULL)
+    {
         fprintf(stderr, "Could not open file %s\n", argv[1]);
         return 2;
     }
