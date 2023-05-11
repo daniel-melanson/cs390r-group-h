@@ -17,9 +17,9 @@ Make sure all paths are set correctly, in this file and the template file.
 
 int main(int argc, char *argv[]) {
 	
-    char* emuhawk_file = "path/to/emuhawk.exe";
-    char* template_path = "path/to/template.lua";
-	char* script_path = "path/to/script.lua";
+    char* emuhawk_path = "/media/sf_Presentation/Linux/BizHawk/EmuHawkMono.sh";
+    char* template_path = "/media/sf_Presentation/template.lua";
+	char* script_path = "/media/sf_Presentation/script.lua";
 	
 	if (argc != 2) {
         printf("Usage: %s input_file\n", argv[0]);
@@ -51,16 +51,22 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Write array of inputs from input file to top of script file
-	char input_buf[sizeof(input_file)+1];
+	fseek(input_file, 0, SEEK_END);
+    unsigned int input_file_length = ftell(input_file);
+    fseek(input_file, 0, SEEK_SET);
+	char input_buf[input_file_length];
 	fputs("local inputs = {\n", script_file);
 	while (fgets(input_buf, sizeof(input_buf), input_file)) {
-		fprintf(script_file, "  \"%s\",\n", strtok(buffer, "\r\n"));
+		fputs(input_buf, script_file);
 	}
-	fputs("}\n", script_file);
+	fputs("\n}\n", script_file);
 	
 	// Read and copy template script into Lua script file
-	char template_buf[sizeof(template_file)+1];
-	while (fgets(template_buf, sizeof(template_buf), script_file)) {
+	fseek(template_file, 0, SEEK_END);
+    unsigned int template_file_length = ftell(template_file);
+    fseek(template_file, 0, SEEK_SET);
+	char template_buf[template_file_length];
+	while (fgets(template_buf, sizeof(template_buf), template_file)) {
 		fputs(template_buf, script_file);
 	}
 	
@@ -92,8 +98,10 @@ int main(int argc, char *argv[]) {
     }
     
     if (exit_code == 0) {
+		printf("Exit code %d", exit_code);
         exit(0);
     } else {
+		printf("Exit code %d", exit_code);
         exit(1);
     }
 }

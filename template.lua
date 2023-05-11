@@ -1,21 +1,19 @@
 
---local inputs = {
-	--{["P1 A"] = true, ["P1 X Axis"] = 127, ["P1 Y Axis"] = 127},
-	--{["P1 Z"] = true, ["P1 X Axis"] = -128, ["P1 Y Axis"] = -128},
---}
+
 local framecount = emu.framecount()
-local num_inputs = 1000
+local num_inputs = #inputs
 local max_repeated_framecount = 100
 local repeated_framecount = 0
 
 function check_for_crash(framecount, repeated_framecount, max_repeated_framecount)
-	if framecount != emu.framecount() then 
+	if framecount ~= emu.framecount() then 
 		repeated_framecount = 0
-	else
-		repeated_framecount = repeated_framecount + 1
-		
+	else repeated_framecount = repeated_framecount + 1
+	end
+
 	if repeated_framecount >= max_repeated_framecount then
 		--exit, crash
+		console.log("Exit with crash")
 		client.exitCode(1)
 	end
 	
@@ -48,5 +46,6 @@ do
 	i = i + 1
 end
 
---exit, no crash	
+--exit, no crash
+console.log("Exit with no crash")
 client.exitCode(0)
