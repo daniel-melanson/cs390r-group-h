@@ -1,5 +1,4 @@
 
-
 local framecount = emu.framecount()
 local num_inputs = #inputs
 local max_repeated_framecount = 100
