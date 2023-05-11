@@ -98,23 +98,6 @@ uint64_t SubHash(uint32_t hi, uint32_t lo)
 }
 
 /**
- * Takes in a pointer to the 0x20 byte of the save file 
- * and fills the GameSlot array with the 5 game slots
- * @param slots: pointer to the slots array
- * @param gameSlot: pointer to the 0x20 byte of the save file
-*/
-void fillGameSlots(GameSlot *slots, unsigned char *gameSlot) {
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
-        for (int j = 0; j < HASH_LENGTH; j++) {
-            slots[i].hash[j] = gameSlot[i * 0x60 + j];
-        }
-        for (int j = 0; j < SAVE_LENGTH; j++) {
-            slots[i].data[j] = gameSlot[i * 0x60 + 8 + j];
-        }
-    }
-}
-
-/**
  * Takes in a pointer to the 0x20 byte of the save file and prints the 5 game slots
  * @param slots: pointer to the 0x20 byte of the save file
 */
@@ -202,8 +185,7 @@ int main(int argc, char **argv) {
     unsigned char *gameSlot = buffer + HEADER_LENGTH;
 
     // create a gameSlot array of 5 and fill in the hash with first 8 bytes, save data with remainder
-    GameSlot slots[5];
-    fillGameSlots(slots, gameSlot);
+    GameSlot *slots = (GameSlot *) gameSlot;
 
     // print out the gameslots, print as hex with spaces, separating the hash and savedata in separate lines
     printGameSlots(slots);
@@ -227,20 +209,7 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    // write first 0x20 bytes ** could skip this **
-    for (int i = 0; i < HEADER_LENGTH; i++) {
-        fputc(buffer[i], fp);
-    }
-
-    // write each game slot
-    for (int i = 0; i < TOTAL_SLOTS; i++) {
-        for (int j = 0; j < HASH_LENGTH; j++) {
-            fputc(slots[i].hash[j], fp);
-        }
-        for (int j = 0; j < SAVE_LENGTH; j++) {
-            fputc(slots[i].data[j], fp);
-        }
-    }
+    fwrite(buffer, 1, SAVE_FILE_SIZE, fp);
 
     fclose(fp);
 
