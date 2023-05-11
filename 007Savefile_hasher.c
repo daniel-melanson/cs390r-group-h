@@ -23,7 +23,7 @@ typedef struct {
 
 /**
  * Takes in a pointer to a game slot
- * @param data: pointer to the 0x20 byte of the save file
+ * @param data: pointer to the beginning of a game slot
  * @returns the hash of the save data
 */
 uint64_t Hash(unsigned char *data)
@@ -165,6 +165,19 @@ void generateGameSlots(GameSlot *slots, unsigned char byte) {
 }
 
 /**
+ * Takes in a pointer to the 0x20 byte of the save file and generates hashes for the 5 game slots
+ * @param slots: pointer to the 0x20 byte of the save file
+*/
+void generateHashes(GameSlot *slots) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
+        uint64_t hash = Hash(slots[i].data);
+        for (int j = 0; j < HASH_LENGTH; j++) {
+            slots[i].hash[j] = (hash >> (8 * (7 - j))) & 0xFF;
+        }
+    }
+}
+
+/**
  * Takes in a pointer to the 0x20 byte of the save file and generates the 5 game slots with random data
  * @param slots: pointer to the 0x20 byte of the save file
 */
@@ -183,7 +196,7 @@ void generateRandomSlots(GameSlot *slots) {
 
 int main(int argc, char **argv) {
     if (argc < 3) {
-        fprintf(stderr, "Usage: ./007savefile_checksum <savefile.eep> <0 specific byte | 1 randomize> <specific byte>\n");
+        fprintf(stderr, "Usage: ./007savefile_checksum <savefile.eep> <0 specific byte | 1 randomize | 2 generate new hashes> <specific byte>\n");
         return 1;
     }
 
@@ -216,10 +229,12 @@ int main(int argc, char **argv) {
     // generate new save data and hash for each slot
     if (atoi(argv[2]) == 0) {
         generateGameSlots(slots, (unsigned char)atoi(argv[3]));
-    } else {
+    } else if (atoi(argv[2]) == 1) {
         // set srand seed to current time
         srand(time(NULL));
         generateRandomSlots(slots);
+    } else {
+        generateHashes(slots);
     }
 
     printGameSlots(slots);
