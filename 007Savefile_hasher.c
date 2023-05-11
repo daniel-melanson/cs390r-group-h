@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
+#include <stdlib.h>
 
 #define HEADER_LENGTH 0x20
 #define HASH_LENGTH 0x8
@@ -163,10 +165,26 @@ void generateGameSlots(GameSlot *slots, unsigned char byte) {
     }
 }
 
+/**
+ * Takes in a pointer to the 0x20 byte of the save file and generates the 5 game slots with random data
+ * @param slots: pointer to the 0x20 byte of the save file
+*/
+void generateRandomSlots(GameSlot *slots) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
+        for (int j = 0; j < SAVE_LENGTH; j++) {
+            slots[i].data[j] = rand() % 256;
+        }
+        uint64_t hash = Hash(slots[i].data);
+        for (int j = 0; j < HASH_LENGTH; j++) {
+            slots[i].hash[j] = (hash >> (8 * (7 - j))) & 0xFF;
+        }
+    }
+}
+
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: ./007savefile_checksum <savefile.eep>");
+    if (argc < 3) {
+        fprintf(stderr, "Usage: ./007savefile_checksum <savefile.eep> <0 specific byte | 1 randomize> <specific byte>\n");
         return 1;
     }
 
@@ -197,7 +215,13 @@ int main(int argc, char **argv) {
     printHashComparison(slots);
 
     // generate new save data and hash for each slot
-    generateGameSlots(slots, 1);
+    if (atoi(argv[2]) == 0) {
+        generateGameSlots(slots, (unsigned char)atoi(argv[3]));
+    } else {
+        // set srand seed to current time
+        srand(time(NULL));
+        generateRandomSlots(slots);
+    }
 
     printGameSlots(slots);
     printHashComparison(slots);
