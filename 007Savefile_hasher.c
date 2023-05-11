@@ -6,6 +6,7 @@
 #define HASH_LENGTH 0x8
 #define SAVE_LENGTH 0x58
 #define SAVE_FILE_SIZE 0x200
+#define TOTAL_SLOTS 0x5
 
 uint64_t SubHash(uint32_t hi, uint32_t lo);
 uint64_t Hash(unsigned char *data);
@@ -104,10 +105,10 @@ uint64_t SubHash(uint32_t hi, uint32_t lo)
 */
 void fillGameSlots(GameSlot *slots, unsigned char *gameSlot) {
     for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 8; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++) {
             slots[i].hash[j] = gameSlot[i * 0x60 + j];
         }
-        for (int j = 0; j < 0x58; j++) {
+        for (int j = 0; j < SAVE_LENGTH; j++) {
             slots[i].data[j] = gameSlot[i * 0x60 + 8 + j];
         }
     }
@@ -118,13 +119,13 @@ void fillGameSlots(GameSlot *slots, unsigned char *gameSlot) {
  * @param slots: pointer to the 0x20 byte of the save file
 */
 void printGameSlots(GameSlot *slots) {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
         printf("Slot %d:\n", i);
-        for (int j = 0; j < 8; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++) {
             printf("%02x ", slots[i].hash[j]);
         }
         printf("\n");
-        for (int j = 0; j < 0x58; j++) {
+        for (int j = 0; j < SAVE_LENGTH; j++) {
             printf("%02x ", slots[i].data[j]);
         }
         printf("\n");
@@ -136,9 +137,9 @@ void printGameSlots(GameSlot *slots) {
  * @param slots: pointer to the 0x20 byte of the save file
 */
 void printHashes(GameSlot *slots) {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
         printf("Slot %d: ", i);
-        for (int j = 0; j < 8; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++) {
             printf("%02x ", slots[i].hash[j]);
         }
         printf("\n");
@@ -151,9 +152,9 @@ void printHashes(GameSlot *slots) {
  * @param slots: pointer to the 0x20 byte of the save file
 */
 void printHashComparison(GameSlot *slots) {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
         printf("Slot %d saved hash: ", i);
-        for (int j = 0; j < 8; j++) {
+        for (int j = 0; j < HASH_LENGTH; j++) {
             printf("%02x ", slots[i].hash[j]);
         }
         printf("\n");
@@ -168,7 +169,7 @@ void printHashComparison(GameSlot *slots) {
  * @param byte: byte to fill the save data with
 */
 void generateGameSlots(GameSlot *slots, unsigned char byte) {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
         for (int j = 0; j < SAVE_LENGTH; j++) {
             slots[i].data[j] = byte;
         }
@@ -227,16 +228,16 @@ int main(int argc, char **argv) {
     }
 
     // write first 0x20 bytes ** could skip this **
-    for (int i = 0; i < 0x20; i++) {
+    for (int i = 0; i < HEADER_LENGTH; i++) {
         fputc(buffer[i], fp);
     }
 
     // write each game slot
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < TOTAL_SLOTS; i++) {
+        for (int j = 0; j < HASH_LENGTH; j++) {
             fputc(slots[i].hash[j], fp);
         }
-        for (int j = 0; j < 0x58; j++) {
+        for (int j = 0; j < SAVE_LENGTH; j++) {
             fputc(slots[i].data[j], fp);
         }
     }
