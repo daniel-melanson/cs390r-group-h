@@ -29,7 +29,7 @@ Like a lot of N64 games, 007 has gathered a large community of [speed runners](h
 
 ## Plan
 
-Using [this decompilation project](https://github.com/n64decomp/007), and a "legally" obtained ROM, our group attempted to find exploits that could lead to an arbitrary code execution exploit. Presentation slides can be found [here]() along with a full writeup [here]().
+Using [this decompilation project](https://github.com/n64decomp/007), and a "legally" obtained ROM, our group attempted to find exploits that could lead to an arbitrary code execution exploit. Presentation slides can be found [here](https://github.com/daniel-melanson/cs390r-group-h/blob/main/Goldeneye%20007.pptx) along with a full writeup [here](https://github.com/daniel-melanson/cs390r-group-h/blob/main/CS390R%20GoldenEye%20007%20Writeup.pdf).
 
 ## Repository Structure
 
